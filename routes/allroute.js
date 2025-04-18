@@ -1,5 +1,5 @@
 import sequelize from "../config/db.js";
-import bcryt from "bcrypt";
+import bcryt from "bcryptjs";
 import Account from "../models/User.js";
 import Todo from "../models/Todo.js";
 import jwt from "jsonwebtoken";
