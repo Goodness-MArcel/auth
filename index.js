@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import { associate } from './models/associate.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.SERVER_PORT;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
