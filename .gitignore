@@ -1,0 +1,21 @@
+# Example .gitignore file
+
+# Ignore OS-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore environment variables
+.env
+.env.local
+
+# Ignore build folders
+dist/
+build/
+*.exe
+
+# Ignore IDE files
+.vscode/
+.idea/
