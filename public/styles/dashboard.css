@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-top: 20px;
+    font-family: "Poppins", sans-serif;
+
+}
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.welcome-card {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+h1 .name {
+    font-size: 20px;
+}
+.stats-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+    
+    h3{
+        font-size: 20px !important;
+    }
+    h4{
+        font-size: 15px;
+    }
+}
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: #2575fc;
+}
+.navbar {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+}
+.logout-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+.logout-btn:hover {
+    background-color: #c82333;
+}
+/* Calendar styles */
+.upcoming-events {
+    max-height: 150px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.upcoming-event {
+    transition: all 0.2s ease;
+}
+
+.upcoming-event:hover {
+    transform: translateX(5px);
+}
+
+/* For the calendar page */
+.fc-event {
+    border: none;
+    padding: 2px 5px;
+    font-size: 0.85em;
+}
+
+.fc-day-today {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+}
+
+.fc-button-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.fc-button-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.fc-button-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .fc-header-toolbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

@@ -16,6 +16,10 @@ const Todo = sequelize.define('Todo', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    completed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     accountId: {
         type: DataTypes.UUID,
         references: {

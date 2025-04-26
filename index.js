@@ -1,7 +1,5 @@
 import express from 'express';
 import sequelize from './config/db.js';
-// import Account from './models/User.js';
-// import Todo from './models/Todo.js';
 import router from './routes/indexroute.js';
 import flash from 'connect-flash';
 import session from 'express-session';
@@ -29,7 +27,7 @@ app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
     next();
-});
+ });
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 

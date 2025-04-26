@@ -8,59 +8,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-top: 20px;
-        }
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .welcome-card {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .stats-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-        }
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 15px;
-            color: #2575fc;
-        }
-        .navbar {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
-        }
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-        }
-        .logout-btn:hover {
-            background-color: #c82333;
-        }
-    </style>
-</head>
+    <link rel="stylesheet" href="/styles/dashboard.css"></head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light">
@@ -96,7 +49,7 @@
     <div class="dashboard-container">
         <!-- Welcome Section -->
         <div class="welcome-card">
-            <h1 class="display-5">Welcome,<%= account.name %> </h1>
+            <h1 class="display-5">Welcome, <span class="name"><%= account.name %></span> </h1>
             <p class="lead">Here's your dashboard overview</p>
             <p>Last login: <%= new Date().toLocaleString() %></p>
         </div>
@@ -107,22 +60,31 @@
         <div class="row">
             <!-- Stats Cards -->
             <div class="col-md-4">
-                <div class="stats-card text-center">
+                <!-- In your dashboard.ejs, update the task card -->
+                <div class="stats-card text-center" style="font-size: 10px;">
                     <div class="card-icon">
                         <i class="fas fa-tasks"></i>
                     </div>
                     <h3>My Tasks</h3>
-                    <h4>5 pending</h4>
+                    <h4><%= taskStats.pending %> pending</h4>
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                            style="width: <%= taskStats.total > 0 ? (taskStats.completed / taskStats.total * 100) : 0 %>%;" 
+                            aria-valuenow="<%= taskStats.completed %>" aria-valuemin="0" aria-valuemax="<%= taskStats.total %>">
+                        </div>
+                    </div>
+                    <p class="text-muted"><%= taskStats.completed %> of <%= taskStats.total %> completed</p>
                     <button type="button" class="btn btn-primary mt-3 me-2" data-bs-toggle="modal" data-bs-target="#addTaskModal">
                         Add Task
                     </button>
                     <a href="/task/user/<%= account.id %>" class="btn btn-primary mt-3">View Tasks</a>
                 </div>
 
+
                 <!-- Add Task Modal -->
                 <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
-                        <% if (error_msg.length > 0) { %>
+                        <% if (locals.error_msg && error_msg.length > 0) { %>
                             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                                 <%= error_msg %>
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -130,8 +92,8 @@
                                 </button>
                             </div>
                         <% } %>
-                
-                        <% if (success_msg.length > 0) { %>
+                        
+                        <% if (locals.success_msg && success_msg.length > 0) { %>
                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 <%= success_msg %>
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -170,11 +132,30 @@
                         <i class="fas fa-calendar-alt"></i>
                     </div>
                     <h3>Upcoming Events</h3>
-                    <h4>2 this week</h4>
-                    <a href="#" class="btn btn-primary mt-3">View Calendar</a>
+                    <% if (upcomingEvents && upcomingEvents.length > 0) { %>
+                        <h4><%= upcomingEvents.length %> this week</h4>
+                        <div class="upcoming-events mt-3 mb-3">
+                            <% upcomingEvents.slice(0, 3).forEach(event => { %>
+                                <div class="upcoming-event mb-2 p-2 rounded" style="background-color: <%= event.color %>20; border-left: 4px solid <%= event.color %>;">
+                                    <div class="d-flex justify-content-between">
+                                        <strong><%= event.title %></strong>
+                                        <small>
+                                            <%= new Date(event.start).toLocaleDateString() %>
+                                        </small>
+                                    </div>
+                                </div>
+                            <% }); %>
+                            <% if (upcomingEvents.length > 3) { %>
+                                <small class="text-muted">And <%= upcomingEvents.length - 3 %> more...</small>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <h4>No upcoming events</h4>
+                        <p class="text-muted mb-3">Plan your week ahead</p>
+                    <% } %>
+                    <a href="/calendar/<%= account.id %>" class="btn btn-primary mt-3">View Calendar</a>
                 </div>
-            </div>
-            
+            </div>            
             <div class="col-md-4">
                 <div class="stats-card text-center">
                     <div class="card-icon">
@@ -190,25 +171,26 @@
         <!-- Recent Activity Section -->
         <div class="mt-5">
             <h2 class="mb-4">Recent Activity</h2>
-            <div class="card">
+            <div class="card" style="font-size: 13px;">
                 <div class="card-body">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Profile updated
-                            <span class="badge bg-primary rounded-pill">Just now</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            New task assigned
-                            <span class="badge bg-primary rounded-pill">2 hours ago</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Project completed
-                            <span class="badge bg-primary rounded-pill">Yesterday</span>
-                        </li>
+                        <% if (activities && activities.length > 0) { %>
+                            <% activities.forEach(activity => { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <%= activity.description %>
+                                    <span class="badge bg-primary rounded-pill"><%= activity.timeAgo %></span>
+                                </li>
+                            <% }); %>
+                        <% } else { %>
+                            <li class="list-group-item text-center text-muted">
+                                <i class="fas fa-info-circle me-2"></i>No recent activities
+                            </li>
+                        <% } %>
                     </ul>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Footer -->

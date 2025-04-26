@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | Calendar</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/dashboard.css">
+    <style>
+        #calendar {
+            max-width: 1100px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+        .event-description {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .color-picker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color-option.selected {
+            border-color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard/<%= UserId %>">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard/<%= UserId %>">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/task/user/<%= UserId %>">Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/calendar/<%= UserId %>">Calendar</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="/logout" class="btn logout-btn">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-calendar-alt me-2"></i>Calendar</h1>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                <i class="fas fa-plus me-2"></i>Add Event
+            </button>
+        </div>
+
+        <div id="calendar"></div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEventModalLabel">Add New Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/event/add/<%= UserId %>" method="POST" id="addEventForm">
+                        <div class="mb-3">
+                            <label for="eventTitle" class="form-label">Event Title</label>
+                            <input type="text" class="form-control" id="eventTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Event Description</label>
+                            <textarea class="form-control" id="eventDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="eventStart" class="form-label">Start Date & Time</label>
+                                <input type="datetime-local" class="form-control                                <input type="datetime-local" class="form-control" id="eventStart" name="start" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="eventEnd" class="form-label">End Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="eventEnd" name="end" required>
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="allDayEvent" name="allDay" value="true">
+                            <label class="form-check-label" for="allDayEvent">All day event</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Event Color</label>
+                            <input type="hidden" name="color" id="eventColor" value="#3788d8">
+                            <div class="color-picker">
+                                <div class="color-option selected" style="background-color: #3788d8;" data-color="#3788d8"></div>
+                                <div class="color-option" style="background-color: #28a745;" data-color="#28a745"></div>
+                                <div class="color-option" style="background-color: #dc3545;" data-color="#dc3545"></div>
+                                <div class="color-option" style="background-color: #ffc107;" data-color="#ffc107"></div>
+                                <div class="color-option" style="background-color: #6f42c1;" data-color="#6f42c1"></div>
+                                <div class="color-option" style="background-color: #fd7e14;" data-color="#fd7e14"></div>
+                                <div class="color-option" style="background-color: #20c997;" data-color="#20c997"></div>
+                                <div class="color-option" style="background-color: #6c757d;" data-color="#6c757d"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventDetailsModalLabel">Event Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="detailsTitle"></h4>
+                    <div class="d-flex justify-content-between mb-3">
+                        <div>
+                            <i class="fas fa-calendar-day me-2"></i>
+                            <span id="detailsDate"></span>
+                        </div>
+                        <div>
+                            <i class="fas fa-clock me-2"></i>
+                            <span id="detailsTime"></span>
+                        </div>
+                    </div>
+                    <div class="event-description" id="detailsDescription"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="editEventBtn">Edit</button>
+                    <button type="button" class="btn btn-danger" id="deleteEventBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Event Modal -->
+    <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editEventModalLabel">Edit Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editEventForm">
+                        <input type="hidden" id="editEventId">
+                        <div class="mb-3">
+                            <label for="editEventTitle" class="form-label">Event Title</label>
+                            <input type="text" class="form-control" id="editEventTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEventDescription" class="form-label">Event Description</label>
+                            <textarea class="form-control" id="editEventDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editEventStart" class="form-label">Start Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="editEventStart" name="start" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editEventEnd" class="form-label">End Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="editEventEnd" name="end" required>
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="editAllDayEvent" name="allDay" value="true">
+                            <label class="form-check-label" for="editAllDayEvent">All day event</label>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Event Color</label>
+                            <input type="hidden" name="color" id="editEventColor" value="#3788d8">
+                            <div class="color-picker" id="editColorPicker">
+                                <div class="color-option" style="background-color: #3788d8;" data-color="#3788d8"></div>
+                                <div class="color-option" style="background-color: #28a745;" data-color="#28a745"></div>
+                                <div class="color-option" style="background-color: #dc3545;" data-color="#dc3545"></div>
+                                <div class="color-option" style="background-color: #ffc107;" data-color="#ffc107"></div>
+                                <div class="color-option" style="background-color: #6f42c1;" data-color="#6f42c1"></div>
+                                <div class="color-option" style="background-color: #fd7e14;" data-color="#fd7e14"></div>
+                                <div class="color-option" style="background-color: #20c997;" data-color="#20c997"></div>
+                                <div class="color-option" style="background-color: #6c757d;" data-color="#6c757d"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Update Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize FullCalendar
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                },
+                events: '/events/<%= UserId %>',
+                editable: true,
+                selectable: true,
+                selectMirror: true,
+                dayMaxEvents: true,
+                
+                // Add new event when selecting dates
+                select: function(info) {
+                    const startDate = new Date(info.start);
+                    const endDate = new Date(info.end);
+                    endDate.setMinutes(endDate.getMinutes() - 1); // Adjust end time
+                    
+                    // Format for datetime-local input
+                    const formatForInput = (date) => {
+                        return date.toISOString().slice(0, 16);
+                    };
+                    
+                    // Set values in the modal
+                    document.getElementById('eventStart').value = formatForInput(startDate);
+                    document.getElementById('eventEnd').value = formatForInput(endDate);
+                    
+                    // Show the modal
+                    const addEventModal = new bootstrap.Modal(document.getElementById('addEventModal'));
+                    addEventModal.show();
+                    
+                    calendar.unselect();
+                },
+                
+                // Show event details when clicking on an event
+                eventClick: function(info) {
+                    const event = info.event;
+                    
+                    // Set event details in the modal
+                    document.getElementById('detailsTitle').textContent = event.title;
+                    
+                    // Format date and time
+                    const startDate = event.start.toLocaleDateString();
+                    const endDate = event.end ? event.end.toLocaleDateString() : startDate;
+                    const dateText = startDate === endDate ? startDate : `${startDate} - ${endDate}`;
+                    document.getElementById('detailsDate').textContent = dateText;
+                    
+                    // Time display
+                    if (event.allDay) {
+                        document.getElementById('detailsTime').textContent = 'All day';
+                    } else {
+                        const startTime = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        const endTime = event.end ? event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                        document.getElementById('detailsTime').textContent = endTime ? `${startTime} - ${endTime}` : startTime;
+                    }
+                    
+                    // Description
+                    const description = event.extendedProps.description || 'No description provided';
+                    document.getElementById('detailsDescription').textContent = description;
+                    
+                    // Store event ID for edit and delete operations
+                    const eventId = event.id;
+                    
+                    // Set up edit button
+                    document.getElementById('editEventBtn').onclick = function() {
+                        // Hide details modal
+                        bootstrap.Modal.getInstance(document.getElementById('eventDetailsModal')).hide();
+                        
+                        // Populate edit form
+                        document.getElementById('editEventId').value = eventId;
+                        document.getElementById('editEventTitle').value = event.title;
+                        document.getElementById('editEventDescription').value = event.extendedProps.description || '';
+                        
+                        // Format dates for input
+                        const formatForInput = (date) => {
+                            return date.toISOString().slice(0, 16);
+                        };
+                        
+                        document.getElementById('editEventStart').value = formatForInput(event.start);
+                        document.getElementById('editEventEnd').value = event.end ? formatForInput(event.end) : formatForInput(event.start);
+                        document.getElementById('editAllDayEvent').checked = event.allDay;
+                        
+                        // Set color
+                        const color = event.backgroundColor || '#3788d8';
+                        document.getElementById('editEventColor').value = color;
+                        
+                        // Highlight selected color
+                        const colorOptions = document.querySelectorAll('#editColorPicker .color-option');
+                        colorOptions.forEach(option => {
+                            option.classList.remove('selected');
+                            if (option.dataset.color === color) {
+                                option.classList.add('selected');
+                            }
+                        });
+                        
+                        // Show edit modal
+                        const editEventModal = new bootstrap.Modal(document.getElementById('editEventModal'));
+                        editEventModal.show();
+                    };
+                    
+                    // Set up delete button
+                    document.getElementById('deleteEventBtn').onclick = function() {
+                        if (confirm('Are you sure you want to delete this event?')) {
+                            fetch(`/event/delete/${eventId}/<%= UserId %>`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Remove event from calendar
+                                    info.event.remove();
+                                    // Hide modal
+                                    bootstrap.Modal.getInstance(document.getElementById('eventDetailsModal')).hide();
+                                } else {
+                                    alert('Error deleting event');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('Error deleting event');
+                            });
+                        }
+                    };
+                    
+                    // Show the modal
+                    const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+                    eventDetailsModal.show();
+                },
+                
+                // Update event when dragged
+                eventDrop: function(info) {
+                    updateEventDates(info.event);
+                },
+                
+                // Update event when resized
+                eventResize: function(info) {
+                    updateEventDates(info.event);
+                }
+            });
+            
+            calendar.render();
+            
+            // Function to update event dates after drag or resize
+            function updateEventDates(event) {
+                const eventId = event.id;
+                const startDate = event.start;
+                const endDate = event.end || startDate;
+                
+                fetch(`/event/update/${eventId}/<%= UserId %>`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: event.title,
+                        description: event.extendedProps.description || '',
+                        start: startDate.toISOString(),
+                        end: endDate.toISOString(),
+                        allDay: event.allDay,
+                        color: event.backgroundColor
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('Error updating event');
+                        calendar.refetchEvents();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating alert');
+                    calendar.refetchEvents();
+                });
+            }
+            
+            // Handle color picker in add event form
+            const colorOptions = document.querySelectorAll('.color-picker .color-option');
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    this.parentNode.querySelectorAll('.color-option').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    
+                    // Update hidden input value
+                    const colorInput = this.parentNode.parentNode.querySelector('input[type="hidden"]');
+                    colorInput.value = this.dataset.color;
+                });
+            });
+            
+            // Handle edit event form submission
+            document.getElementById('editEventForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const eventId = document.getElementById('editEventId').value;
+                const title = document.getElementById('editEventTitle').value;
+                const description = document.getElementById('editEventDescription').value;
+                const start = document.getElementById('editEventStart').value;
+                const end = document.getElementById('editEventEnd').value;
+                const allDay = document.getElementById('editAllDayEvent').checked;
+                const color = document.getElementById('editEventColor').value;
+                
+                fetch(`/event/update/${eventId}/<%= UserId %>`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description,
+                        start,
+                        end,
+                        allDay: allDay.toString(),
+                        color
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Hide modal
+                        bootstrap.Modal.getInstance(document.getElementById('editEventModal')).hide();
+                        // Refresh events
+                        calendar.refetchEvents();
+                    } else {
+                        alert('Error updating event');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating event');
+                });
+            });
+            
+            // Handle all-day checkbox
+            document.getElementById('allDayEvent').addEventListener('change', function() {
+                const startInput = document.getElementById('eventStart');
+                const endInput = document.getElementById('eventEnd');
+                
+                if (this.checked) {
+                    // Store current time values
+                    const startDate = new Date(startInput.value);
+                    const endDate = new Date(endInput.value);
+                    
+                    // Set to start of day
+                    startDate.setHours(0, 0, 0);
+                    // Set to end of day
+                    endDate.setHours(23, 59, 0);
+                    
+                    // Update inputs
+                    startInput.value = startDate.toISOString().slice(0, 16);
+                    endInput.value = endDate.toISOString().slice(0, 16);
+                }
+            });
+            
+            // Same for edit form
+            document.getElementById('editAllDayEvent').addEventListener('change', function() {
+                const startInput = document.getElementById('editEventStart');
+                const endInput = document.getElementById('editEventEnd');
+                
+                if (this.checked) {
+                    // Store current time values
+                    const startDate = new Date(startInput.value);
+                    const endDate = new Date(endInput.value);
+                    
+                    // Set to start of day
+                    startDate.setHours(0, 0, 0);
+                    // Set to end of day
+                    endDate.setHours(23, 59, 0);
+                    
+                    // Update inputs
+                    startInput.value = startDate.toISOString().slice(0, 16);
+                    endInput.value = endDate.toISOString().slice(0, 16);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
